@@ -388,6 +388,9 @@ function Selection(options = {}) {
         },
 
         _reacalcAreaRect() {
+            if (that._targetContainer) {
+                return
+            }
             const {scrollTop, scrollHeight, clientHeight, scrollLeft, scrollWidth, clientWidth} = that._targetContainer;
             const brect = that._targetBoundary;
             const ss = that._scrollSpeed;
