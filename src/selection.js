@@ -26,7 +26,8 @@ function Selection(options = {}) {
             boundaries: ['html'],
             selectionAreaContainer: 'body'
         }, options),
-
+        
+        _originScrollTop: undefined,
         // Store for keepSelection
         _stored: [],
         _selectables: [],
@@ -334,7 +335,7 @@ function Selection(options = {}) {
                     const {scrollTop, scrollLeft} = scon;
 
                     // Reduce velocity, use ceil in both directions to scroll at least 1px per frame
-                    if (scrollY) {
+                    if (scrollY && that._originScrollTop === undefined) {
                         scon.scrollTop += ceil(ss.y / scrollSpeedDivider);
                         that._ay1 -= scon.scrollTop - scrollTop;
                     }
@@ -388,7 +389,7 @@ function Selection(options = {}) {
         },
 
         _reacalcAreaRect() {
-            if (that._targetContainer) {
+            if (!that._targetContainer) {
                 return
             }
             const {scrollTop, scrollHeight, clientHeight, scrollLeft, scrollWidth, clientWidth} = that._targetContainer;
@@ -417,10 +418,11 @@ function Selection(options = {}) {
                 ss.y = null;
             }
 
-            const x3 = min(that._ax1, x);
-            const y3 = min(that._ay1, y);
+            const ay1 = typeof that._originScrollTop === 'number' ? that._ay1 - scrollTop + that._originScrollTop : that._ay1
+            const x3 = min(that._ax1, x)
+            const y3 = min(ay1, y);
             const x4 = max(that._ax1, x);
-            const y4 = max(that._ay1, y);
+            const y4 = max(ay1, y);
             that._areaDomRect = new DOMRect(x3, y3, x4 - x3, y4 - y3);
         },
 
@@ -437,6 +439,7 @@ function Selection(options = {}) {
         },
 
         _onTapStop(evt, noevent) {
+            that._originScrollTop = undefined
             const {frame, singleClick} = that.options;
 
             // Remove event handlers
@@ -524,8 +527,11 @@ function Selection(options = {}) {
          * @param evt A MouseEvent / TouchEvent -like object
          * @param silent If beforestart should be fired,
          */
-        trigger(evt, silent = true) {
+        trigger(evt, silent = true, selectionScrolling = false) {
             that._onTapStart(evt, silent);
+            if (selectionScrolling && that._targetContainer) {
+                that._originScrollTop = that._targetContainer.scrollTop
+            }
         },
 
         /**

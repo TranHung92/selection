@@ -8,8 +8,7 @@
     "license": "MIT",
     "scripts": {
         "build": "webpack --config webpack.config.prod.js",
-        "dev": "webpack-dev-server --config webpack.config.dev.js",
-        "lint": "eslint ./src --fix"
+        "dev": "webpack-dev-server --config webpack.config.dev.js"
     },
     "repository": {
         "type": "git",
