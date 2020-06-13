@@ -1,8 +1,25 @@
-import {css, eventPath, intersects, off, on, removeElement, selectAll, simplifyEvent} from './utils';
-import {version}                                                                      from '../package';
+import {
+    css,
+    eventPath,
+    intersects,
+    off,
+    on,
+    removeElement,
+    selectAll,
+    simplifyEvent
+} from './utils';
+import {
+    version
+} from '../package';
 
 // Some var shorting for better compression and readability
-const {abs, max, min, round, ceil} = Math;
+const {
+    abs,
+    max,
+    min,
+    round,
+    ceil
+} = Math;
 const preventDefault = e => e.preventDefault();
 
 function Selection(options = {}) {
@@ -26,14 +43,14 @@ function Selection(options = {}) {
             boundaries: ['html'],
             selectionAreaContainer: 'body'
         }, options),
-        
+
         _originScrollTop: undefined,
         // Store for keepSelection
         _stored: [],
         _selectables: [],
         _selected: [], // Currently touched elements
         _changed: {
-            added: [],  // Added elements since last selection
+            added: [], // Added elements since last selection
             removed: [] // Removed elements since last selection
         },
 
@@ -52,10 +69,15 @@ function Selection(options = {}) {
 
         // Is getting set on movement. Varied.
         _scrollAvailable: true,
-        _scrollSpeed: {x: null, y: null},
+        _scrollSpeed: {
+            x: null,
+            y: null
+        },
 
         _init() {
-            const {frame} = that.options;
+            const {
+                frame
+            } = that.options;
             that._area = frame.createElement('div');
             that._clippingElement = frame.createElement('div');
             that._clippingElement.appendChild(that._area);
@@ -83,7 +105,9 @@ function Selection(options = {}) {
         },
 
         _bindStartEvents(type) {
-            const {frame} = that.options;
+            const {
+                frame
+            } = that.options;
             const fn = type === 'on' ? on : off;
             fn(frame, 'mousedown', that._onTapStart);
 
@@ -95,8 +119,16 @@ function Selection(options = {}) {
         },
 
         _onTapStart(evt, silent = false) {
-            const {x, y, target} = simplifyEvent(evt);
-            const {startareas, boundaries, frame} = that.options;
+            const {
+                x,
+                y,
+                target
+            } = simplifyEvent(evt);
+            const {
+                startareas,
+                boundaries,
+                frame
+            } = that.options;
             const targetBoundingClientRect = target.getBoundingClientRect();
 
             // Find start-areas and boundaries
@@ -136,7 +168,9 @@ function Selection(options = {}) {
             on(frame, 'selectstart', preventDefault);
 
             // Add listener
-            on(frame, ['touchmove', 'mousemove'], that._delayedTapMove, {passive: false});
+            on(frame, ['touchmove', 'mousemove'], that._delayedTapMove, {
+                passive: false
+            });
             on(frame, ['mouseup', 'touchcancel', 'touchend'], that._onTapStop);
 
             // Firefox will scroll down the page which would break the selection.
@@ -144,7 +178,9 @@ function Selection(options = {}) {
         },
 
         _onSingleTap(evt) {
-            const {tapMode} = that.options;
+            const {
+                tapMode
+            } = that.options;
             const spl = simplifyEvent(evt);
             let target = null;
 
@@ -153,9 +189,17 @@ function Selection(options = {}) {
             } else if (tapMode === 'touch') {
                 that.resolveSelectables();
 
-                const {x, y} = spl;
+                const {
+                    x,
+                    y
+                } = spl;
                 target = that._selectables.find(v => {
-                    const {right, left, top, bottom} = v.getBoundingClientRect();
+                    const {
+                        right,
+                        left,
+                        top,
+                        bottom
+                    } = v.getBoundingClientRect();
                     return x < right && x > left && y < bottom && y > top;
                 });
             } else {
@@ -213,16 +257,29 @@ function Selection(options = {}) {
         },
 
         _delayedTapMove(evt) {
-            const {x, y} = simplifyEvent(evt);
-            const {startThreshold, frame} = that.options;
-            const {_ax1, _ay1} = that; // Coordinates of first "tap"
+            const {
+                x,
+                y
+            } = simplifyEvent(evt);
+            const {
+                startThreshold,
+                frame
+            } = that.options;
+            const {
+                _ax1,
+                _ay1
+            } = that; // Coordinates of first "tap"
 
             // Check pixel threshold
             const thresholdType = typeof startThreshold;
             if ((thresholdType === 'number' && abs((x + y) - (_ax1 + _ay1)) >= startThreshold) ||
                 (thresholdType === 'object' && abs(x - _ax1) >= startThreshold.x || abs(y - _ay1) >= startThreshold.y)) {
-                off(frame, ['mousemove', 'touchmove'], that._delayedTapMove, {passive: false});
-                on(frame, ['mousemove', 'touchmove'], that._onTapMove, {passive: false});
+                off(frame, ['mousemove', 'touchmove'], that._delayedTapMove, {
+                    passive: false
+                });
+                on(frame, ['mousemove', 'touchmove'], that._onTapMove, {
+                    passive: false
+                });
 
                 // Make area element visible
                 css(that._area, 'display', 'block');
@@ -247,7 +304,9 @@ function Selection(options = {}) {
                     that._scrollAvailable = true;
 
                     // Detect mouse scrolling
-                    on(window, 'wheel', that._manualScroll, {passive: false});
+                    on(window, 'wheel', that._manualScroll, {
+                        passive: false
+                    });
 
                     /**
                      * The selection-area will also cover other element which are
@@ -306,8 +365,13 @@ function Selection(options = {}) {
         },
 
         _onTapMove(evt) {
-            const {x, y} = simplifyEvent(evt);
-            const {scrollSpeedDivider} = that.options;
+            const {
+                x,
+                y
+            } = simplifyEvent(evt);
+            const {
+                scrollSpeedDivider
+            } = that.options;
             const scon = that._targetContainer;
             let ss = that._scrollSpeed;
             that._ax2 = x;
@@ -332,7 +396,10 @@ function Selection(options = {}) {
                      * If the value exeeds the scrollable area it will
                      * be set to the max / min value. So change only
                      */
-                    const {scrollTop, scrollLeft} = scon;
+                    const {
+                        scrollTop,
+                        scrollLeft
+                    } = scon;
 
                     // Reduce velocity, use ceil in both directions to scroll at least 1px per frame
                     if (scrollY && that._originScrollTop === undefined) {
@@ -375,7 +442,9 @@ function Selection(options = {}) {
         },
 
         _manualScroll(evt) {
-            const {manualScrollSpeed} = that.options;
+            const {
+                manualScrollSpeed
+            } = that.options;
 
             // Consistent scrolling speed on all browsers
             const deltaY = evt.deltaY ? (evt.deltaY > 0 ? 1 : -1) : 0;
@@ -392,7 +461,14 @@ function Selection(options = {}) {
             if (!that._targetContainer) {
                 return
             }
-            const {scrollTop, scrollHeight, clientHeight, scrollLeft, scrollWidth, clientWidth} = that._targetContainer;
+            const {
+                scrollTop,
+                scrollHeight,
+                clientHeight,
+                scrollLeft,
+                scrollWidth,
+                clientWidth
+            } = that._targetContainer;
             const brect = that._targetBoundary;
             const ss = that._scrollSpeed;
             let x = that._ax2;
@@ -427,7 +503,12 @@ function Selection(options = {}) {
         },
 
         _redrawArea() {
-            const {x, y, width, height} = that._areaDomRect;
+            const {
+                x,
+                y,
+                width,
+                height
+            } = that._areaDomRect;
             const areaStyle = that._area.style;
 
             // It's generally faster to not use es6-templates
@@ -440,7 +521,10 @@ function Selection(options = {}) {
 
         _onTapStop(evt, noevent) {
             that._originScrollTop = undefined
-            const {frame, singleClick} = that.options;
+            const {
+                frame,
+                singleClick
+            } = that.options;
 
             // Remove event handlers
             off(frame, ['mousemove', 'touchmove'], that._delayedTapMove);
@@ -455,7 +539,10 @@ function Selection(options = {}) {
             }
 
             // Reset scroll speed
-            that._scrollSpeed = {x: null, y: null};
+            that._scrollSpeed = {
+                x: null,
+                y: null
+            };
 
             // Unbind mouse scrolling listener
             off(window, 'wheel', that._manualScroll);
@@ -469,8 +556,15 @@ function Selection(options = {}) {
         },
 
         _updatedTouchingElements() {
-            const {_selected, _selectables, options, _areaDomRect} = that;
-            const {mode} = options;
+            const {
+                _selected,
+                _selectables,
+                options,
+                _areaDomRect
+            } = that;
+            const {
+                mode
+            } = options;
 
             // Update
             const touched = [];
@@ -503,7 +597,10 @@ function Selection(options = {}) {
 
             // Save
             that._selected = touched;
-            that._changed = {added, removed};
+            that._changed = {
+                added,
+                removed
+            };
         },
 
         _emit(event, evt) {
@@ -578,7 +675,10 @@ function Selection(options = {}) {
          * Allows multiple selections.
          */
         keepSelection() {
-            const {_selected, _stored} = that;
+            const {
+                _selected,
+                _stored
+            } = that;
 
             for (let i = 0; i < _selected.length; i++) {
                 const el = _selected[i];
@@ -630,7 +730,9 @@ function Selection(options = {}) {
          * @return  {*}      the new value
          */
         option(name, value) {
-            const {options} = that;
+            const {
+                options
+            } = that;
             return value === undefined ? options[name] : (options[name] = value);
         },
 
@@ -661,7 +763,11 @@ function Selection(options = {}) {
          * @param query - CSS Query, can be an array of queries
          */
         select(query) {
-            const {_selected, _stored, options} = that;
+            const {
+                _selected,
+                _stored,
+                options
+            } = that;
             const elements = selectAll(query, options.frame).filter(el =>
                 !_selected.includes(el) &&
                 !_stored.includes(el)
